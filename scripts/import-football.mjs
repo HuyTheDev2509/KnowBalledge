@@ -1,6 +1,6 @@
 /** Import historical squads from Sportmonks. Never uses current club membership.
  * node --env-file=.env.local scripts/import-football.mjs
- * Writes a reviewed cache and SQL outside migrations. No production mutation.
+ * Writes a reviewed JSON cache. No production mutation.
  */
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
@@ -21,8 +21,4 @@ for(const s of seasons){const year=Number(s.name.slice(0,4)),season=`${year}/${S
 if(!players.length)throw Error('No eligible historical records. Check subscription coverage, statistics includes and thresholds. No cache generated.');
 const unique=[...new Map(players.map(p=>[`${p.id}:${p.season}:${p.clubId}`,p])).values()];
 await writeFile(`${output}/players.json`,JSON.stringify(unique,null,2));
-const quote=s=>"'"+String(s).replaceAll("'","''")+"'";
-const sql=["DELETE FROM football_cache WHERE id LIKE 'sportmonks-v1%';"];
-for(let i=0;i<unique.length;i+=100){sql.push(`INSERT INTO football_cache (id,payload,updated_at) VALUES (${quote('sportmonks-v1-'+i/100)},${quote(JSON.stringify(unique.slice(i,i+100)))},${Date.now()});`)}
-await writeFile(`${output}/football-cache.sql`,sql.join('\n'));
-console.log(`Ready: ${unique.length} season records in ${output}/players.json and football-cache.sql. Review before importing into DB. No token stored. Portraits disabled by default until image rights are confirmed.`);
+console.log(`Ready: ${unique.length} season records in ${output}/players.json. Review before running pnpm data:publish. No token stored. Portraits disabled by default until image rights are confirmed.`);

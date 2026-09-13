@@ -49,3 +49,6 @@ next-env.d.ts
 
 !.env.example
 *.tsbuildinfo
+
+# Local-only match storage; never deploy or commit.
+/.local/
